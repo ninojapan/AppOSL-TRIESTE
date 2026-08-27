@@ -258,6 +258,32 @@ kbd{background:var(--panel3);border:1px solid var(--border);border-bottom-width:
 .flash.ok{background:linear-gradient(180deg,#16a34a,#128a3f);color:#04140a;display:flex}
 .flash.nok{background:linear-gradient(180deg,#ef4444,#cf2b2b);color:#fff;display:flex}
 
+/* ---------- Tessere / carte prepagate ---------- */
+.fa-badge{display:inline-flex;align-items:center;justify-content:center;min-width:36px;padding:3px 8px;border-radius:8px;font-size:11.5px;font-weight:800;letter-spacing:.5px;border:1px solid}
+.fa-EI{color:#4ade80;border-color:#1f7a45;background:#0e2a1a}
+.fa-MM{color:#38bdf8;border-color:#1c5c86;background:#0b2436}
+.fa-AM{color:#7dd3fc;border-color:#2a6f9e;background:#0b2a3a}
+.fa-CC{color:#f87171;border-color:#7a2020;background:#2a1010}
+.fa-Altro{color:#cbd5e1;border-color:#3a4a63;background:#1a2030}
+.credit{font-weight:800;font-variant-numeric:tabular-nums}
+.credit.pos{color:var(--green)}.credit.neg{color:var(--red)}.credit.zero{color:var(--muted)}
+.cardbanner{padding:12px 16px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#123049,#0e2338);display:none;align-items:center;gap:10px}
+.cardbanner.on{display:flex}
+.cardbanner .cbinfo{flex:1;min-width:0}
+.cardbanner .cbname{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cardbanner .cbcredit{font-size:12.5px;margin-top:2px;color:var(--muted)}
+.cardbanner .cbx{background:var(--panel2);border:1px solid var(--border);color:var(--muted);width:30px;height:30px;border-radius:9px;font-size:16px;flex:0 0 auto}
+.cardbanner .cbx:hover{color:var(--red);border-color:var(--red)}
+.recharge-row{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:8px}
+.recharge-row .rr-main{flex:1;font-size:13.5px}
+.sect-title{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--accent);font-weight:800;margin:18px 0 10px;display:flex;align-items:center;gap:8px;border-top:1px solid var(--border);padding-top:14px}
+.balbox{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 4px}
+.balcell{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
+.balcell .bl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.balcell .bv{font-size:20px;font-weight:800;margin-top:3px}
+.modal.tall{max-height:92vh;display:flex;flex-direction:column}
+.modal.tall .modal-body{overflow:auto}
+
 @media(max-width:1200px){
   .app{grid-template-columns:260px minmax(0,1fr);grid-template-areas:"head head" "side main" "cart cart"}
   .cartpanel{border-left:none;border-top:1px solid var(--border);max-height:46vh}
@@ -302,6 +328,7 @@ kbd{background:var(--panel3);border:1px solid var(--border);border-bottom-width:
       <button data-view="cassa" class="active"><span class="ic">🧾</span>Cassa</button>
       <button data-view="manuale"><span class="ic">🛒</span>Vendita</button>
       <button data-view="inventario"><span class="ic">📦</span>Inventario</button>
+      <button data-view="tessere"><span class="ic">💳</span>Tessere</button>
       <button data-view="registro"><span class="ic">📒</span>Registro</button>
       <button data-view="stats"><span class="ic">📊</span>Statistiche</button>
       <button data-view="incasso"><span class="ic">💶</span>Incasso</button>
@@ -397,6 +424,17 @@ kbd{background:var(--panel3);border:1px solid var(--border);border-bottom-width:
       <div id="invTable"></div>
     </section>
 
+    <!-- ---- TESSERE PREPAGATE ---- -->
+    <section id="view-tessere" class="view">
+      <div class="view-head"><h2><span class="ic">💳</span> Tessere prepagate</h2></div>
+      <div class="kpis" id="tesKpis"></div>
+      <div class="toolbar">
+        <div class="search"><span class="mag">🔎</span><input id="searchTes" placeholder="Cerca per nominativo, codice o forza armata..."></div>
+        <button class="btn blue small" id="btnNewCard" style="width:auto">➕ Nuova tessera</button>
+      </div>
+      <div id="tesTable"></div>
+    </section>
+
     <!-- ---- REGISTRO DI CASSA ---- -->
     <section id="view-registro" class="view">
       <div class="view-head"><h2><span class="ic">📒</span> Registro di cassa</h2></div>
@@ -414,6 +452,10 @@ kbd{background:var(--panel3);border:1px solid var(--border);border-bottom-width:
       <div class="two-col">
         <div class="panelbox"><h3>📂 Vendite per tipologia</h3><div id="statCat" class="bars"></div></div>
         <div class="panelbox"><h3>🏆 Prodotti più venduti</h3><div id="statTop" class="bars"></div></div>
+      </div>
+      <div class="two-col">
+        <div class="panelbox"><h3>💳 Metodo di pagamento</h3><div id="statPay" class="bars"></div></div>
+        <div class="panelbox"><h3>👤 Top clienti (tessere)</h3><div id="statClients" class="bars"></div></div>
       </div>
       <div class="panelbox"><h3>📅 Incasso ultimi 14 giorni</h3><div id="statDays" class="bars"></div></div>
     </section>
@@ -451,6 +493,10 @@ kbd{background:var(--panel3);border:1px solid var(--border);border-bottom-width:
     <div class="scanline">
       <div class="lab"><span class="pulse"></span> Lettore attivo — scansiona o digita</div>
       <input id="scanBox" placeholder="Codice a barre..." autocomplete="off" inputmode="numeric">
+    </div>
+    <div class="cardbanner" id="cardBanner">
+      <div class="cbinfo"><div class="cbname" id="cbName"></div><div class="cbcredit" id="cbCredit"></div></div>
+      <button class="cbx" id="cbRemove" title="Rimuovi cliente / torna a contanti">×</button>
     </div>
     <div class="cart-items" id="cartItems"></div>
     <div class="cart-foot">
@@ -516,6 +562,14 @@ kbd{background:var(--panel3);border:1px solid var(--border);border-bottom-width:
   </div>
 </div>
 
+<!-- ============ MODAL TESSERA (crea / modifica / ricariche / storico) ============ -->
+<div class="overlay" id="cardOverlay">
+  <div class="modal wide tall">
+    <div class="modal-head"><h3 id="cardTitle">Tessera</h3><button class="x" id="cardClose">×</button></div>
+    <div class="modal-body" id="cardBody"></div>
+  </div>
+</div>
+
 <!-- ============ MODAL EDIT VENDITA (registro) ============ -->
 <div class="overlay" id="saleOverlay">
   <div class="modal wide">
@@ -547,11 +601,16 @@ kbd{background:var(--panel3);border:1px solid var(--border);border-bottom-width:
 const API = '/api/entries';
 const LOCAL_API = '/api/local-data';
 
-let DB = { products: [], sales: [], settings: { currency:'EUR', storeName:'O.S.L. Nave TRIESTE' } };
+let DB = { products: [], sales: [], cards: [], settings: { currency:'EUR', storeName:'O.S.L. Nave TRIESTE' } };
 let CART = [];                 // {productId, name, qty, unitPrice, category}
 let scanModal = null;          // {product, qty}
 let currentView = 'cassa';
 let editingSaleId = null;
+let activeCard = null;         // id tessera cliente per lo scontrino corrente
+let openCardId = null;         // id tessera aperta nel modal
+
+const FORZE = ['EI','MM','AM','CC','Altro'];
+const FORZE_LAB = {EI:'EI · Esercito Italiano',MM:'MM · Marina Militare',AM:'AM · Aeronautica Militare',CC:'CC · Carabinieri',Altro:'Altro'};
 
 /* -------- Utility -------- */
 const $ = id => document.getElementById(id);
@@ -591,7 +650,7 @@ let localTimer=null;
 function saveLocal(){
   clearTimeout(localTimer);
   localTimer=setTimeout(async()=>{
-    try{ await fetch(LOCAL_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cart:CART,lastUpdate:new Date().toISOString()})}); }catch(e){}
+    try{ await fetch(LOCAL_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cart:CART,activeCard:activeCard,lastUpdate:new Date().toISOString()})}); }catch(e){}
   },250);
 }
 function setSave(state){
@@ -605,9 +664,21 @@ function ensureShape(){
   if(!DB || typeof DB!=='object') DB={};
   if(!Array.isArray(DB.products)) DB.products=[];
   if(!Array.isArray(DB.sales)) DB.sales=[];
+  if(!Array.isArray(DB.cards)) DB.cards=[];
   if(!DB.settings) DB.settings={currency:'EUR',storeName:'O.S.L. Nave TRIESTE'};
   DB.products.forEach(p=>{ if(!Array.isArray(p.batches)) p.batches=[]; if(p.image==null)p.image=''; if(p.category==null)p.category='Varie'; if(p.price==null)p.price=0; });
+  DB.cards.forEach(c=>{ if(!Array.isArray(c.recharges)) c.recharges=[]; });
+  DB.sales.forEach(s=>{ if(!s.payment) s.payment = s.cardId? 'card':'contanti'; });
 }
+
+/* -------- Tessere prepagate -------- */
+function getCard(id){ return DB.cards.find(c=>c.id===id); }
+function findCardByCode(code){ code=(code||'').trim().toLowerCase(); if(!code)return null; return DB.cards.find(c=>(c.code||'').trim().toLowerCase()===code); }
+function cardName(c){ if(!c)return ''; const n=[c.grado, (c.cognome||'').toUpperCase(), c.nome].filter(x=>x&&x.trim()).join(' ').trim(); return n||c.code||'Tessera'; }
+function cardRecharged(c){ return (c.recharges||[]).reduce((a,r)=>a+(Number(r.amount)||0),0); }
+function cardSpent(id){ return DB.sales.filter(s=>s.cardId===id).reduce((a,s)=>a+(Number(s.total)||0),0); }
+function cardBalance(c){ return +((cardRecharged(c))-(cardSpent(c.id))).toFixed(2); }
+function forzaOptions(sel){ return FORZE.map(f=>`<option value="${f}" ${f===sel?'selected':''}>${FORZE_LAB[f]}</option>`).join(''); }
 
 /* -------- Prodotti / magazzino -------- */
 function getProduct(id){ return DB.products.find(p=>p.id===id); }
@@ -686,18 +757,33 @@ function clearCart(){ if(!CART.length)return; if(!confirm('Svuotare lo scontrino
 
 function finalizeSale(){
   if(!CART.length){ toast('Scontrino vuoto','warn'); return; }
-  const items=[]; let total=0;
+  const card = activeCard ? getCard(activeCard) : null;
+  let total=+CART.reduce((a,l)=>a+l.qty*l.unitPrice,0).toFixed(2);
+  if(card){
+    const bal=cardBalance(card);
+    if(total>bal){
+      if(!confirm('Credito insufficiente su tessera '+cardName(card)+'.\n\nResiduo:  '+fmtMoney(bal)+'\nTotale:   '+fmtMoney(total)+'\n\nAddebitare comunque? (il credito andrà in negativo)')) return;
+    }
+  }
+  const items=[];
   CART.forEach(l=>{
     const p=getProduct(l.productId); if(!p) return;
     consumeStock(p,l.qty);
-    const lineTotal=+(l.qty*l.unitPrice).toFixed(2); total+=lineTotal;
-    items.push({productId:p.id,name:p.name,qty:l.qty,unitPrice:l.unitPrice,category:p.category||'Varie',lineTotal});
+    items.push({productId:p.id,name:p.name,qty:l.qty,unitPrice:l.unitPrice,category:p.category||'Varie',lineTotal:+(l.qty*l.unitPrice).toFixed(2)});
   });
-  total=+total.toFixed(2);
-  DB.sales.push({id:uid(),timestamp:new Date().toISOString(),items,total});
-  CART=[]; saveDB(); saveLocal(); renderAll();
-  flash('ok','Vendita registrata · '+fmtMoney(total));
-  toast('Vendita registrata: '+fmtMoney(total),'ok');
+  const sale={id:uid(),timestamp:new Date().toISOString(),items,total};
+  if(card){ sale.cardId=card.id; sale.payment='card'; } else { sale.payment='contanti'; }
+  DB.sales.push(sale);
+  CART=[]; const paidCard=card; activeCard=null;
+  saveDB(); saveLocal(); renderAll();
+  if(paidCard){
+    const nb=cardBalance(getCard(paidCard.id));
+    flash('ok','💳 '+cardName(paidCard)+' · addebito '+fmtMoney(total)+' · residuo '+fmtMoney(nb));
+    toast('Addebitato su tessera: '+fmtMoney(total)+' — nuovo residuo '+fmtMoney(nb),'ok');
+  }else{
+    flash('ok','Vendita registrata · '+fmtMoney(total));
+    toast('Vendita registrata: '+fmtMoney(total),'ok');
+  }
   focusScan();
 }
 
@@ -744,25 +830,47 @@ function handleBarcode(code){
   const now=Date.now();
   if(code===lastCode && now-lastHandled<150) return; // dedup doppio-invio
   lastCode=code; lastHandled=now;
-  const p=DB.products.find(x=>x.barcode && x.barcode.trim()===code);
-  if(!p){
-    flash('nok','Codice non riconosciuto: '+code);
-    toast('Codice '+code+' non a catalogo — inserito nel form prodotto','warn');
-    $('f-barcode').value=code;
+
+  // --- Contesto TESSERE: la scansione gestisce le carte ---
+  if(currentView==='tessere'){
+    if($('cardOverlay').classList.contains('open')){ const cc=$('cd-code'); if(cc){ cc.value=code; flash('ok','Codice acquisito'); } return; }
+    const card=findCardByCode(code);
+    if(card){ openCardModal(card.id); flash('ok','Tessera: '+cardName(card)); }
+    else { openNewCard(code); flash('ok','Nuova tessera'); }
     return;
   }
-  flash('ok',p.name);
-  openScanModalFor(p);
+
+  // --- Contesto CASSA/POS ---
+  const p=DB.products.find(x=>x.barcode && x.barcode.trim()===code);
+  if(p){ flash('ok',p.name); openScanModalFor(p); return; }
+
+  const card=findCardByCode(code);
+  if(card){ setActiveCard(card.id); return; }
+
+  // sconosciuto: potrebbe essere un nuovo prodotto o una nuova tessera
+  flash('nok','Codice non riconosciuto: '+code);
+  toast('Codice '+code+' non trovato — nuovo prodotto (pannello sinistro) o nuova tessera (sez. Tessere)','warn');
+  $('f-barcode').value=code;
 }
+function setActiveCard(id){
+  const c=getCard(id); if(!c)return;
+  activeCard=id;
+  flash('ok','👤 '+cardName(c)+' · Credito '+fmtMoney(cardBalance(c)));
+  toast('Cliente: '+cardName(c)+' — credito residuo '+fmtMoney(cardBalance(c)),'ok');
+  renderCart();
+}
+function clearActiveCard(){ activeCard=null; renderCart(); saveLocal(); }
 // rilevatore globale (scanner = burst veloce che termina con Invio)
 let scanBuf='', lastKey=0, scanStart=0;
 document.addEventListener('keydown', e=>{
   const now=Date.now();
   // scorciatoie globali
-  if(e.key==='F2'){ e.preventDefault(); finalizeSale(); return; }
+  const anyOverlay=['scanOverlay','prodOverlay','saleOverlay','cardOverlay'].some(id=>$(id).classList.contains('open'));
+  if(e.key==='F2'){ if(anyOverlay && !scanModal) return; e.preventDefault(); finalizeSale(); return; }
   if(e.key==='Escape'){
     if(scanModal){ closeScanModal(); return; }
-    ['scanOverlay','prodOverlay','saleOverlay'].forEach(id=>$(id).classList.remove('open'));
+    ['scanOverlay','prodOverlay','saleOverlay','cardOverlay'].forEach(id=>$(id).classList.remove('open'));
+    openCardId=null;
     return;
   }
   if(e.key==='Enter'){
@@ -787,9 +895,11 @@ function renderAll(){
   renderGrid('gridCassa', $('searchCassa').value);
   renderGrid('gridManuale', $('searchManuale').value);
   renderInventory();
+  renderTessere();
   renderRegistro();
   renderStats();
   renderIncasso();
+  if($('cardOverlay').classList.contains('open') && openCardId) renderCardDynamic(openCardId);
 }
 
 function renderCatList(){
@@ -841,6 +951,16 @@ function renderCart(){
   const n=CART.reduce((a,l)=>a+l.qty,0);
   $('cartCount').textContent = n? (n+' articol'+(n===1?'o':'i')+' · '+CART.length+' rig'+(CART.length===1?'a':'he')) : 'Nessun articolo';
   $('cartTotal').textContent=fmtMoney(cartTotal());
+
+  // banner cliente / tessera attiva
+  const banner=$('cardBanner'), c=activeCard?getCard(activeCard):null;
+  if(c){
+    banner.classList.add('on');
+    $('cbName').innerHTML=`<span class="fa-badge fa-${esc(c.forza||'Altro')}" style="margin-right:6px">${esc(c.forza||'—')}</span>👤 ${esc(cardName(c))}`;
+    const bal=cardBalance(c), after=+(bal-cartTotal()).toFixed(2);
+    $('cbCredit').innerHTML=`Credito: <span class="credit ${bal<0?'neg':'pos'}">${fmtMoney(bal)}</span> &nbsp;·&nbsp; dopo spesa: <span class="credit ${after<0?'neg':'pos'}">${fmtMoney(after)}</span>`;
+  } else banner.classList.remove('on');
+  $('btnCash').innerHTML = c ? '💳 ADDEBITA <span style="font-size:12px;opacity:.8">(F2)</span>' : '💰 INCASSA <span style="font-size:12px;opacity:.8">(F2)</span>';
 }
 
 /* ---- Inventario ---- */
@@ -946,15 +1066,19 @@ function renderRegistro(){
 
   const filter=($('searchReg').value||'').toLowerCase().trim();
   let list=sales;
-  if(filter) list=sales.filter(s=>s.items.some(i=>i.name.toLowerCase().includes(filter)));
+  if(filter) list=sales.filter(s=>s.items.some(i=>i.name.toLowerCase().includes(filter)) || (s.cardId && cardName(getCard(s.cardId)).toLowerCase().includes(filter)));
   if(!list.length){ $('regTable').innerHTML=`<div class="empty"><span class="big">📒</span>Nessuna vendita registrata.</div>`; return; }
 
   const rows=list.map(s=>{
     const art=s.items.map(i=>`${i.qty}× ${esc(i.name)}`).join(', ');
     const pezzi=s.items.reduce((a,i)=>a+i.qty,0);
+    const pay = s.cardId
+      ? `<span class="pill" style="color:var(--violet);border-color:#5b479a;background:#171233">💳 ${esc(cardName(getCard(s.cardId))||'Tessera')}</span>`
+      : `<span class="pill" style="color:var(--green);border-color:#1f7a45;background:#0e2a1a">💵 Contanti</span>`;
     return `<tr>
       <td style="white-space:nowrap">${fmtDateTime(s.timestamp)}</td>
       <td>${art}</td>
+      <td>${pay}</td>
       <td class="center">${pezzi}</td>
       <td class="num"><b style="color:var(--green)">${fmtMoney(s.total)}</b></td>
       <td class="center" style="white-space:nowrap">
@@ -964,7 +1088,7 @@ function renderRegistro(){
     </tr>`;
   }).join('');
   $('regTable').innerHTML=`<div class="tablewrap"><table>
-    <thead><tr><th>Data / ora</th><th>Articoli</th><th class="center">Pezzi</th><th class="num">Totale</th><th class="center">Azioni</th></tr></thead>
+    <thead><tr><th>Data / ora</th><th>Articoli</th><th>Pagamento</th><th class="center">Pezzi</th><th class="num">Totale</th><th class="center">Azioni</th></tr></thead>
     <tbody>${rows}</tbody></table></div>`;
 }
 function deleteSale(id){
@@ -1057,6 +1181,19 @@ function renderStats(){
     const lab=new Date(d+'T00:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'});
     return barRow(lab,byDay[d],maxDay,fmtMoney(byDay[d]),'#38bdf8');
   }).join('');
+
+  // metodo di pagamento
+  const cardRev=sales.filter(s=>s.cardId).reduce((a,s)=>a+s.total,0);
+  const cashRev=+(totRev-cardRev).toFixed(2);
+  const maxPay=Math.max(1,cashRev,cardRev);
+  $('statPay').innerHTML = barRow('Contanti',cashRev,maxPay,fmtMoney(cashRev),'#22c55e')+barRow('Carte prepagate',cardRev,maxPay,fmtMoney(cardRev),'#a78bfa');
+
+  // top clienti per spesa
+  const cl={};
+  sales.filter(s=>s.cardId).forEach(s=>{ const c=getCard(s.cardId); const key=c?cardName(c):'(tessera rimossa)'; cl[key]=(cl[key]||0)+s.total; });
+  const clArr=Object.entries(cl).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxCl=Math.max(1,...clArr.map(c=>c[1]));
+  $('statClients').innerHTML = clArr.length? clArr.map((c,ix)=>barRow(c[0],c[1],maxCl,fmtMoney(c[1]),palette[ix%palette.length])).join('') : `<div class="empty">Nessun acquisto con tessera</div>`;
 }
 
 /* ---- Incasso ---- */
@@ -1075,12 +1212,17 @@ function renderIncasso(){
   const list=DB.sales.filter(s=>{ const d=dayKey(s.timestamp); return d>=from && d<=to; });
   const rev=list.reduce((a,s)=>a+s.total,0);
   const pezzi=list.flatMap(s=>s.items).reduce((a,i)=>a+i.qty,0);
-  const avg=list.length?rev/list.length:0;
+  const cardRev=list.filter(s=>s.cardId).reduce((a,s)=>a+s.total,0);
+  const cashRev=+(rev-cardRev).toFixed(2);
+  const rech=DB.cards.flatMap(c=>c.recharges||[]).filter(r=>{ const d=r.date||''; return d>=from && d<=to; }).reduce((a,r)=>a+(Number(r.amount)||0),0);
+  const realCash=+(cashRev+rech).toFixed(2);
   $('incKpis').innerHTML=`
-    ${kpi('💶','Incasso periodo',fmtMoney(rev),'green')}
-    ${kpi('🧾','N. vendite',fmtNum(list.length),'blue')}
-    ${kpi('📦','Pezzi venduti',fmtNum(pezzi),'violet')}
-    ${kpi('🧮','Scontrino medio',fmtMoney(avg),'amber')}`;
+    ${kpi('🧾','Vendite periodo',fmtMoney(rev),'blue')}
+    ${kpi('💵','di cui Contanti',fmtMoney(cashRev),'green')}
+    ${kpi('💳','di cui Carte (prepagato)',fmtMoney(cardRev),'violet')}
+    ${kpi('⬆️','Ricariche incassate',fmtMoney(rech),'amber')}
+    ${kpi('🏦','Cassa reale = contanti + ricariche',fmtMoney(realCash),'green')}
+    ${kpi('📦','Pezzi venduti',fmtNum(pezzi),'blue')}`;
 
   // dettaglio per giorno
   const byDay={};
@@ -1099,6 +1241,195 @@ function renderIncasso(){
     <tfoot><tr style="border-top:2px solid var(--border)"><td><b>Totale</b></td><td class="center"><b>${list.length}</b></td><td class="center"><b>${pezzi}</b></td><td class="num"><b style="color:var(--gold)">${fmtMoney(rev)}</b></td></tr></tfoot>
     </table></div>`;
 }
+
+/* ---- Tessere: elenco ---- */
+function renderTessere(){
+  const cards=DB.cards.slice();
+  const totCredit=cards.reduce((a,c)=>a+Math.max(0,cardBalance(c)),0);
+  const totRech=cards.reduce((a,c)=>a+cardRecharged(c),0);
+  const neg=cards.filter(c=>cardBalance(c)<0).length;
+  $('tesKpis').innerHTML=`
+    ${kpi('💳','Tessere',fmtNum(cards.length),'blue')}
+    ${kpi('💰','Credito in circolazione',fmtMoney(totCredit),'green')}
+    ${kpi('⬆️','Totale ricaricato',fmtMoney(totRech),'amber')}
+    ${kpi('⚠️','Tessere in negativo',fmtNum(neg),'violet')}`;
+
+  const filter=($('searchTes').value||'').toLowerCase().trim();
+  let list=cards.sort((a,b)=>(a.cognome||'').localeCompare(b.cognome||'')||(a.nome||'').localeCompare(b.nome||''));
+  if(filter) list=list.filter(c=>(cardName(c)+' '+(c.code||'')+' '+(c.forza||'')).toLowerCase().includes(filter));
+  if(!list.length){ $('tesTable').innerHTML=`<div class="empty"><span class="big">💳</span>Nessuna tessera.<br>Crea una tessera con "Nuova tessera" o scansiona un codice in questa sezione.</div>`; return; }
+
+  const rows=list.map(c=>{
+    const bal=cardBalance(c);
+    return `<tr style="cursor:pointer" onclick="openCardModal('${c.id}')">
+      <td><span class="fa-badge fa-${esc(c.forza||'Altro')}">${esc(c.forza||'—')}</span></td>
+      <td>${c.grado?`<span style="color:var(--muted)">${esc(c.grado)}</span> `:''}<b>${esc((c.cognome||'').toUpperCase())} ${esc(c.nome||'')}</b></td>
+      <td style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted)">${esc(c.code||'')}</td>
+      <td class="num"><span class="credit ${bal<0?'neg':(bal===0?'zero':'pos')}">${fmtMoney(bal)}</span></td>
+      <td class="center" style="white-space:nowrap">
+        <button class="iconbtn" title="Usa in cassa" onclick="event.stopPropagation();setActiveFromCard('${c.id}')">🛒</button>
+        <button class="iconbtn" title="Apri / modifica" onclick="event.stopPropagation();openCardModal('${c.id}')">✏️</button>
+      </td>
+    </tr>`;
+  }).join('');
+  $('tesTable').innerHTML=`<div class="tablewrap"><table>
+    <thead><tr><th>F.A.</th><th>Grado / Nominativo</th><th>Codice</th><th class="num">Credito residuo</th><th class="center">Azioni</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+}
+
+/* ---- Tessere: modal nuova ---- */
+function openNewCard(code){
+  openCardId=null;
+  $('cardTitle').textContent='Nuova tessera prepagata';
+  $('cardBody').innerHTML=`
+    <div class="row2">
+      <div class="field"><label>Codice (barcode / cod. fiscale)</label><input id="cd-code" value="${esc(code||'')}" placeholder="scansiona o digita" autocomplete="off"></div>
+      <div class="field"><label>Forza armata</label><select id="cd-forza">${forzaOptions('EI')}</select></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Grado</label><input id="cd-grado" placeholder="es. Serg. Magg." autocomplete="off"></div>
+      <div class="field"><label>Importo ricarica iniziale (€)</label><input id="cd-amount" type="number" min="0" step="0.50" placeholder="0.00"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Cognome</label><input id="cd-cognome" autocomplete="off"></div>
+      <div class="field"><label>Nome</label><input id="cd-nome" autocomplete="off"></div>
+    </div>
+    <div class="modal-foot" style="margin-top:14px">
+      <button class="btn ghost" onclick="closeCardModal()">Annulla</button>
+      <button class="btn blue" onclick="createCard()">Crea tessera ✓</button>
+    </div>
+    <div class="enterhint">Il <b>codice</b> è ciò che scansionerai in cassa per identificare il cliente e addebitare la spesa.</div>`;
+  $('cardOverlay').classList.add('open');
+  setTimeout(()=>{ const e=$('cd-code'); if(e) e.focus(); },40);
+}
+function createCard(){
+  const code=$('cd-code').value.trim();
+  if(!code){ toast('Inserisci il codice tessera','warn'); return; }
+  if(findCardByCode(code)){ toast('Esiste già una tessera con questo codice','warn'); return; }
+  const c={ id:uid(), code, forza:$('cd-forza').value, grado:$('cd-grado').value.trim(),
+            cognome:$('cd-cognome').value.trim(), nome:$('cd-nome').value.trim(),
+            recharges:[], createdAt:new Date().toISOString() };
+  const amt=parseFloat($('cd-amount').value)||0;
+  if(amt>0) c.recharges.push({id:uid(),amount:+amt.toFixed(2),date:todayKey(),note:'ricarica iniziale'});
+  DB.cards.push(c);
+  saveDB(); renderAll();
+  toast('Tessera creata'+(amt>0?(' · ricarica '+fmtMoney(amt)):''),'ok');
+  openCardModal(c.id);
+}
+
+/* ---- Tessere: modal modifica ---- */
+function openCardModal(id){
+  const c=getCard(id); if(!c) return;
+  openCardId=id;
+  $('cardTitle').textContent='Tessera · '+(cardName(c)||c.code||'');
+  $('cardBody').innerHTML=`
+    <div class="row2">
+      <div class="field"><label>Codice (barcode / cod. fiscale)</label><input id="cd-code" value="${esc(c.code||'')}" autocomplete="off"></div>
+      <div class="field"><label>Forza armata</label><select id="cd-forza">${forzaOptions(c.forza||'Altro')}</select></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Grado</label><input id="cd-grado" value="${esc(c.grado||'')}" autocomplete="off"></div>
+      <div class="field"><label>&nbsp;</label><button class="btn ghost" style="width:100%" onclick="setActiveFromCard('${id}')">🛒 Usa in cassa</button></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Cognome</label><input id="cd-cognome" value="${esc(c.cognome||'')}" autocomplete="off"></div>
+      <div class="field"><label>Nome</label><input id="cd-nome" value="${esc(c.nome||'')}" autocomplete="off"></div>
+    </div>
+    <div id="cardBalanceBox"></div>
+
+    <div class="sect-title">➕ Aggiungi ricarica</div>
+    <div class="row2">
+      <div class="field"><label>Importo (€)</label><input id="rc-amount" type="number" min="0" step="0.50" placeholder="0.00"></div>
+      <div class="field"><label>Data</label><input id="rc-date" type="date" value="${todayKey()}"></div>
+    </div>
+    <div class="field"><label>Nota (opzionale)</label><input id="rc-note" placeholder="es. contanti / bonifico" autocomplete="off"></div>
+    <button class="btn" onclick="addRecharge('${id}')">Registra ricarica</button>
+
+    <div class="sect-title">📈 Ricariche</div>
+    <div id="cardRecharges"></div>
+
+    <div class="sect-title">🛒 Storico acquisti (modificabile — aggiorna registro e magazzino)</div>
+    <div id="cardHistory"></div>
+
+    <div class="modal-foot" style="margin-top:18px">
+      <button class="btn ghost" style="flex:0 0 auto" onclick="deleteCard('${id}')">🗑️ Elimina</button>
+      <button class="btn ghost" onclick="closeCardModal()">Chiudi</button>
+      <button class="btn blue" onclick="saveCardIdentity('${id}')">Salva dati ✓</button>
+    </div>`;
+  renderCardDynamic(id);
+  $('cardOverlay').classList.add('open');
+}
+function renderCardDynamic(id){
+  const c=getCard(id); if(!c) return;
+  const box=$('cardBalanceBox');
+  if(box){
+    const rec=cardRecharged(c), sp=cardSpent(id), bal=cardBalance(c);
+    box.innerHTML=`<div class="balbox">
+      <div class="balcell"><div class="bl">Ricaricato</div><div class="bv" style="color:var(--gold)">${fmtMoney(rec)}</div></div>
+      <div class="balcell"><div class="bl">Speso</div><div class="bv" style="color:var(--accent)">${fmtMoney(sp)}</div></div>
+      <div class="balcell"><div class="bl">Residuo</div><div class="bv" style="color:${bal<0?'var(--red)':'var(--green)'}">${fmtMoney(bal)}</div></div>
+    </div>`;
+  }
+  const rl=$('cardRecharges');
+  if(rl){
+    const recs=(c.recharges||[]).slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+    rl.innerHTML=recs.length? recs.map(r=>`<div class="recharge-row">
+      <div class="rr-main"><b style="color:var(--gold)">+ ${fmtMoney(r.amount)}</b> <span style="color:var(--muted)">· ${fmtDate(r.date)}</span>${r.note?` · <span style="color:var(--muted)">${esc(r.note)}</span>`:''}</div>
+      <button class="iconbtn danger" title="Elimina ricarica" onclick="delRecharge('${id}','${r.id}')">🗑️</button>
+    </div>`).join('') : `<div style="color:var(--muted2);font-size:13px">Nessuna ricarica registrata.</div>`;
+  }
+  const hl=$('cardHistory');
+  if(hl){
+    const sales=DB.sales.filter(s=>s.cardId===id).sort((a,b)=>b.timestamp.localeCompare(a.timestamp));
+    hl.innerHTML=sales.length? `<div class="tablewrap"><table>
+      <thead><tr><th>Data / ora</th><th>Articoli</th><th class="num">Totale</th><th class="center">Azioni</th></tr></thead>
+      <tbody>${sales.map(s=>`<tr>
+        <td style="white-space:nowrap">${fmtDateTime(s.timestamp)}</td>
+        <td>${s.items.map(i=>`${i.qty}× ${esc(i.name)}`).join(', ')}</td>
+        <td class="num"><b style="color:var(--accent)">${fmtMoney(s.total)}</b></td>
+        <td class="center" style="white-space:nowrap"><button class="iconbtn" title="Modifica" onclick="openSaleEdit('${s.id}')">✏️</button><button class="iconbtn danger" title="Elimina" onclick="deleteSale('${s.id}')">🗑️</button></td>
+      </tr>`).join('')}</tbody></table></div>`
+      : `<div style="color:var(--muted2);font-size:13px">Nessun acquisto registrato con questa tessera.</div>`;
+  }
+}
+function saveCardIdentity(id){
+  const c=getCard(id); if(!c)return;
+  const code=$('cd-code').value.trim();
+  const other=findCardByCode(code);
+  if(other && other.id!==id){ toast("Codice già usato da un'altra tessera",'warn'); return; }
+  c.code=code; c.forza=$('cd-forza').value; c.grado=$('cd-grado').value.trim();
+  c.cognome=$('cd-cognome').value.trim(); c.nome=$('cd-nome').value.trim();
+  saveDB(); renderAll();
+  $('cardTitle').textContent='Tessera · '+(cardName(c)||c.code||'');
+  toast('Dati tessera aggiornati','ok');
+}
+function addRecharge(id){
+  const c=getCard(id); if(!c)return;
+  const amt=parseFloat($('rc-amount').value)||0;
+  if(amt<=0){ toast('Importo ricarica non valido','warn'); return; }
+  c.recharges.push({id:uid(),amount:+amt.toFixed(2),date:$('rc-date').value||todayKey(),note:$('rc-note').value.trim()});
+  $('rc-amount').value=''; $('rc-note').value='';
+  saveDB(); renderAll();
+  toast('Ricarica registrata: '+fmtMoney(amt),'ok');
+}
+function delRecharge(id,rid){
+  const c=getCard(id); if(!c)return;
+  if(!confirm('Eliminare questa ricarica?'))return;
+  c.recharges=c.recharges.filter(r=>r.id!==rid);
+  saveDB(); renderAll();
+}
+function deleteCard(id){
+  const c=getCard(id); if(!c)return;
+  const has=DB.sales.some(s=>s.cardId===id);
+  if(!confirm('Eliminare la tessera di '+(cardName(c)||c.code)+'?'+(has?'\nGli acquisti resteranno nel registro di cassa come vendite in contanti.':'')))return;
+  DB.sales.forEach(s=>{ if(s.cardId===id){ delete s.cardId; s.payment='contanti'; } });
+  DB.cards=DB.cards.filter(x=>x.id!==id);
+  if(activeCard===id) activeCard=null;
+  saveDB(); renderAll(); closeCardModal();
+  toast('Tessera eliminata','ok');
+}
+function setActiveFromCard(id){ setActiveCard(id); closeCardModal(); showView('cassa'); }
+function closeCardModal(){ $('cardOverlay').classList.remove('open'); openCardId=null; }
 
 /* ---- helpers render ---- */
 function kpi(ic,lab,val,cls){ return `<div class="kpi ${cls||''}"><span class="k-ic">${ic}</span><div class="k-lab">${lab}</div><div class="k-val">${val}</div></div>`; }
@@ -1149,6 +1480,7 @@ function showView(v){
   if(v==='cassa') setTimeout(focusScan,50);
   if(v==='incasso') renderIncasso();
   if(v==='stats') renderStats();
+  if(v==='tessere') renderTessere();
 }
 
 // form aggiungi prodotto
@@ -1181,6 +1513,7 @@ $('searchCassa').addEventListener('input',e=>renderGrid('gridCassa',e.target.val
 $('searchManuale').addEventListener('input',e=>renderGrid('gridManuale',e.target.value));
 $('searchInv').addEventListener('input',renderInventory);
 $('searchReg').addEventListener('input',renderRegistro);
+$('searchTes').addEventListener('input',renderTessere);
 
 // modal quantità
 $('sm-qty').addEventListener('input',()=>{ if(scanModal){ scanModal.qty=Math.max(1,parseInt($('sm-qty').value)||1); updateModalTot(); } });
@@ -1198,6 +1531,20 @@ $('scanBox').addEventListener('keydown',e=>{
 // cassa / cart
 $('btnCash').onclick=finalizeSale;
 $('btnClear').onclick=clearCart;
+$('cbRemove').onclick=clearActiveCard;
+
+// tessere
+$('btnNewCard').onclick=()=>openNewCard('');
+$('cardClose').onclick=closeCardModal;
+$('cardOverlay').addEventListener('mousedown',e=>{ if(e.target===$('cardOverlay')) closeCardModal(); });
+$('cardOverlay').addEventListener('keydown',e=>{
+  if(e.key!=='Enter') return;
+  const t=e.target; if(t.tagName==='SELECT') return;
+  e.preventDefault(); e.stopPropagation();
+  if(t.id==='rc-amount'||t.id==='rc-note'){ if(openCardId) addRecharge(openCardId); }
+  else if(openCardId){ saveCardIdentity(openCardId); }
+  else { createCard(); }
+});
 
 // incasso
 $('incMode').addEventListener('change',renderIncasso);
@@ -1236,6 +1583,7 @@ async function boot(){
   DB=await fetchJSON(API,DB); ensureShape();
   const local=await fetchJSON(LOCAL_API,{cart:[]});
   CART=Array.isArray(local.cart)?local.cart.filter(l=>getProduct(l.productId)):[];
+  activeCard=(local.activeCard && getCard(local.activeCard))?local.activeCard:null;
   renderAll();
   setSave('saved');
   showView('cassa');

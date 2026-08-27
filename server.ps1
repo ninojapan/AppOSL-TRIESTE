@@ -27,6 +27,7 @@ $DefaultData = @'
 {
   "products": [],
   "sales": [],
+  "cards": [],
   "settings": { "currency": "EUR", "storeName": "O.S.L. Nave TRIESTE" }
 }
 '@
