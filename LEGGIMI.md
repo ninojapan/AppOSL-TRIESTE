@@ -48,9 +48,17 @@ meccanica di avvio del progetto GEPA MASTER.
   (le scadenze più vicine per prime, FIFO) e aggiorna gli incassi.
 - **Registro di cassa**: elenco delle vendite, con modifica ed eliminazione ordine
   (il magazzino viene ripristinato/riadeguato di conseguenza).
-- **Statistiche**: per tipologia, prodotti più venduti, incasso ultimi 14 giorni.
+- **Tessere prepagate**: crea una tessera (codice, forza armata, grado, cognome,
+  nome) e registra le ricariche in €. In cassa scansiona la tessera del cliente
+  per addebitare la spesa sul suo credito. **Se il lettore è in avaria**, nel
+  pannello scontrino c'è la ricerca **cliente per cognome**: digiti il cognome,
+  se più tessere corrispondono le vedi tutte (con grado, nome e credito) e
+  clicchi quella giusta. Modificando lo storico di una tessera si aggiornano
+  automaticamente registro di cassa e magazzino.
+- **Statistiche**: per tipologia, prodotti più venduti, metodo di pagamento,
+  top clienti, incasso ultimi 14 giorni.
 - **Incasso**: oggi, ieri, ultimi 7/30 giorni, questo mese o periodo personalizzato
-  (dal → al), con dettaglio per giorno.
+  (dal → al), con split contanti/carte e ricariche incassate.
 
 I dati sono salvati automaticamente su disco in UTF-8 (senza BOM). Da sinistra puoi
 anche **esportare/importare** un backup `.json`.
