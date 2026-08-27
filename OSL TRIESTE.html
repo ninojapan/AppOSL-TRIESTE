@@ -489,7 +489,7 @@ kbd{background:var(--panel3);border:1px solid var(--border);border-bottom-width:
       <input id="scanBox" placeholder="Codice a barre..." autocomplete="off" inputmode="numeric">
     </div>
     <div class="clientsearch">
-      <div class="lab">👤 Cliente tessera — cerca per <b style="color:var(--violet)">cognome</b> (se il lettore è in avaria)</div>
+      <div class="lab">Cerca tessera per cognome</div>
       <input id="clientSearch" placeholder="Cognome, nome o codice..." autocomplete="off">
       <div id="clientResults" class="cs-results"></div>
     </div>
@@ -615,6 +615,7 @@ const FORZE_LAB = {EI:'EI · Esercito Italiano',MM:'MM · Marina Militare',AM:'A
 const $ = id => document.getElementById(id);
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const up = s => (s==null?'':String(s)).toUpperCase();
 const fmtMoney = n => (Number(n)||0).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
 const fmtNum = n => (Number(n)||0).toLocaleString('it-IT');
 function fmtDate(d){ if(!d) return '—'; const dt=new Date(String(d).length<=10?d+'T00:00:00':d); return dt.toLocaleDateString('it-IT'); }
@@ -673,7 +674,7 @@ function ensureShape(){
 /* -------- Tessere prepagate -------- */
 function getCard(id){ return DB.cards.find(c=>c.id===id); }
 function findCardByCode(code){ code=(code||'').trim().toLowerCase(); if(!code)return null; return DB.cards.find(c=>(c.code||'').trim().toLowerCase()===code); }
-function cardName(c){ if(!c)return ''; const n=[c.grado, (c.cognome||'').toUpperCase(), c.nome].filter(x=>x&&x.trim()).join(' ').trim(); return n||c.code||'Tessera'; }
+function cardName(c){ if(!c)return ''; const n=[up(c.grado), up(c.cognome), up(c.nome)].filter(x=>x&&x.trim()).join(' ').trim(); return n||c.code||'Tessera'; }
 function cardRecharged(c){ return (c.recharges||[]).reduce((a,r)=>a+(Number(r.amount)||0),0); }
 function cardSpent(id){ return DB.sales.filter(s=>s.cardId===id).reduce((a,s)=>a+(Number(s.total)||0),0); }
 function cardBalance(c){ return +((cardRecharged(c))-(cardSpent(c.id))).toFixed(2); }
@@ -879,7 +880,7 @@ function renderClientResults(q){
     const bal=cardBalance(c);
     return `<button class="cs-item" onclick="selectClient('${c.id}')">
       <span class="fa-badge fa-${esc(c.forza||'Altro')}">${esc(c.forza||'—')}</span>
-      <span class="cs-name">${c.grado?`<span style="color:var(--muted)">${esc(c.grado)}</span> `:''}<b>${esc((c.cognome||'').toUpperCase())}</b> ${esc(c.nome||'')}</span>
+      <span class="cs-name"><b>${c.grado?esc(up(c.grado))+' ':''}${esc(up(c.cognome))} ${esc(up(c.nome))}</b></span>
       <span class="credit ${bal<0?'neg':(bal===0?'zero':'pos')}">${fmtMoney(bal)}</span>
     </button>`;
   }).join('');
@@ -1292,7 +1293,7 @@ function renderTessere(){
     const bal=cardBalance(c);
     return `<tr style="cursor:pointer" onclick="openCardModal('${c.id}')">
       <td><span class="fa-badge fa-${esc(c.forza||'Altro')}">${esc(c.forza||'—')}</span></td>
-      <td>${c.grado?`<span style="color:var(--muted)">${esc(c.grado)}</span> `:''}<b>${esc((c.cognome||'').toUpperCase())} ${esc(c.nome||'')}</b></td>
+      <td><b>${c.grado?esc(up(c.grado))+' ':''}${esc(up(c.cognome))} ${esc(up(c.nome))}</b></td>
       <td style="font-family:ui-monospace,monospace;font-size:12px;color:var(--muted)">${esc(c.code||'')}</td>
       <td class="num"><span class="credit ${bal<0?'neg':(bal===0?'zero':'pos')}">${fmtMoney(bal)}</span></td>
       <td class="center" style="white-space:nowrap">
@@ -1335,8 +1336,8 @@ function createCard(){
   const code=$('cd-code').value.trim();
   if(!code){ toast('Inserisci il codice tessera','warn'); return; }
   if(findCardByCode(code)){ toast('Esiste già una tessera con questo codice','warn'); return; }
-  const c={ id:uid(), code, forza:$('cd-forza').value, grado:$('cd-grado').value.trim(),
-            cognome:$('cd-cognome').value.trim(), nome:$('cd-nome').value.trim(),
+  const c={ id:uid(), code, forza:$('cd-forza').value, grado:up($('cd-grado').value.trim()),
+            cognome:up($('cd-cognome').value.trim()), nome:up($('cd-nome').value.trim()),
             recharges:[], createdAt:new Date().toISOString() };
   const amt=parseFloat($('cd-amount').value)||0;
   if(amt>0) c.recharges.push({id:uid(),amount:+amt.toFixed(2),date:todayKey(),note:'ricarica iniziale'});
@@ -1426,8 +1427,8 @@ function saveCardIdentity(id){
   const code=$('cd-code').value.trim();
   const other=findCardByCode(code);
   if(other && other.id!==id){ toast("Codice già usato da un'altra tessera",'warn'); return; }
-  c.code=code; c.forza=$('cd-forza').value; c.grado=$('cd-grado').value.trim();
-  c.cognome=$('cd-cognome').value.trim(); c.nome=$('cd-nome').value.trim();
+  c.code=code; c.forza=$('cd-forza').value; c.grado=up($('cd-grado').value.trim());
+  c.cognome=up($('cd-cognome').value.trim()); c.nome=up($('cd-nome').value.trim());
   saveDB(); renderAll();
   $('cardTitle').textContent='Tessera · '+(cardName(c)||c.code||'');
   toast('Dati tessera aggiornati','ok');
