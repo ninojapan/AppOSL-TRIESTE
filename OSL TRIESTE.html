@@ -56,7 +56,6 @@ input,select,textarea{font-family:inherit}
 }
 .brand{display:flex;align-items:center;gap:14px;min-width:260px}
 #logo{width:58px;height:58px;object-fit:contain;filter:drop-shadow(0 3px 8px rgba(0,0,0,.5))}
-.logo-fallback{width:58px;height:58px;align-items:center;justify-content:center}
 .brand .titles h1{margin:0;font-size:19px;letter-spacing:.3px;line-height:1.05}
 .brand .titles .sub{font-size:12px;color:var(--gold);font-weight:700;letter-spacing:2px;text-transform:uppercase}
 .spacer{flex:1}
@@ -300,72 +299,7 @@ kbd{background:var(--panel3);border:1px solid var(--border);border-bottom-width:
   <!-- ============ TOPBAR ============ -->
   <header class="topbar">
     <div class="brand">
-      <img id="logo" src="logo.png" alt="Stemma Nave TRIESTE" style="display:none"
-           onload="this.style.display='block';document.getElementById('logoFallback').style.display='none';">
-      <div id="logoFallback" class="logo-fallback" style="display:flex">
-        <svg viewBox="0 0 640 640" width="58" height="58" role="img" aria-label="Stemma Nave Trieste"
-             xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-             style="filter:drop-shadow(0 3px 8px rgba(0,0,0,.5))">
-          <defs>
-            <linearGradient id="lgRing" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#ededee"/><stop offset=".5" stop-color="#c8c9cb"/><stop offset="1" stop-color="#a6a8ab"/>
-            </linearGradient>
-            <linearGradient id="lgMetal" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#fcfcfd"/><stop offset=".55" stop-color="#c2c4c7"/><stop offset="1" stop-color="#7e8286"/>
-            </linearGradient>
-            <linearGradient id="lgMetalD" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#bfc1c4"/><stop offset="1" stop-color="#5c5f63"/>
-            </linearGradient>
-            <clipPath id="lgDisc"><circle cx="320" cy="320" r="246"/></clipPath>
-            <path id="lgArcTop" d="M66.2 201.7 A280 280 0 0 1 573.8 201.7" fill="none"/>
-            <path id="lgArcBot" d="M56.9 415.8 A280 280 0 0 0 583.1 415.8" fill="none"/>
-          </defs>
-
-          <!-- anello -->
-          <circle cx="320" cy="320" r="316" fill="#6f7276"/>
-          <circle cx="320" cy="320" r="308" fill="url(#lgRing)"/>
-          <circle cx="320" cy="320" r="252" fill="#6f7276"/>
-          <circle cx="320" cy="320" r="246" fill="#ffffff"/>
-
-          <!-- disco tricolore -->
-          <g clip-path="url(#lgDisc)">
-            <rect x="74" y="74" width="164" height="492" fill="#0a9b49"/>
-            <rect x="238" y="74" width="164" height="492" fill="#ffffff"/>
-            <rect x="402" y="74" width="164" height="492" fill="#e12b32"/>
-          </g>
-
-          <!-- emblema metallico centrale (stilizzato) -->
-          <g stroke="#565a5e" stroke-width="3" stroke-linejoin="round">
-            <polygon points="320,300 150,352 214,302 302,278" fill="url(#lgMetal)"/>
-            <polygon points="150,352 214,302 232,342" fill="url(#lgMetalD)"/>
-            <polygon points="320,300 490,352 426,302 338,278" fill="url(#lgMetal)"/>
-            <polygon points="490,352 426,302 408,342" fill="url(#lgMetalD)"/>
-            <polygon points="300,258 340,258 358,304 320,506 282,304" fill="url(#lgMetal)"/>
-            <polygon points="320,304 358,304 320,506" fill="url(#lgMetalD)"/>
-            <polygon points="320,236 346,274 320,304 294,274" fill="url(#lgMetal)"/>
-          </g>
-
-          <circle cx="320" cy="320" r="246" fill="none" stroke="#6f7276" stroke-width="3"/>
-
-          <!-- banner TRIESTE -->
-          <polygon points="150,150 490,150 452,214 188,214" fill="#ffffff" stroke="#111" stroke-width="6" stroke-linejoin="round"/>
-          <text x="320" y="201" text-anchor="middle" font-family="'Arial Black',Arial,sans-serif" font-weight="900"
-                font-size="66" letter-spacing="2" fill="#ffffff" stroke="#111" stroke-width="6" paint-order="stroke">TRIESTE</text>
-
-          <!-- testo dell'anello -->
-          <g fill="#83868a" stroke="#565a5e" stroke-width="1.1" paint-order="stroke"
-             font-family="Arial,Helvetica,sans-serif" font-weight="800">
-            <text font-size="53" letter-spacing="4"><textPath xlink:href="#lgArcTop" href="#lgArcTop" startOffset="50%" text-anchor="middle">FULGE    SUPER    MARE</textPath></text>
-            <text font-size="50" letter-spacing="11"><textPath xlink:href="#lgArcBot" href="#lgArcBot" startOffset="50%" text-anchor="middle">L 9 8 9 0</textPath></text>
-          </g>
-
-          <!-- stelle -->
-          <g fill="#f1b70e" stroke="#7a5c00" stroke-width="2">
-            <path transform="translate(104,446)" d="M0,-22 6,-7 22,-7 9,3 14,19 0,9 -14,19 -9,3 -22,-7 -6,-7 Z"/>
-            <path transform="translate(536,446)" d="M0,-22 6,-7 22,-7 9,3 14,19 0,9 -14,19 -9,3 -22,-7 -6,-7 Z"/>
-          </g>
-        </svg>
-      </div>
+      <img id="logo" src="logo.png" alt="Stemma Nave TRIESTE">
       <div class="titles">
         <h1>Gestione O.S.L.</h1>
         <div class="sub">Nave Trieste</div>
