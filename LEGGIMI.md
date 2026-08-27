@@ -12,7 +12,7 @@ meccanica di avvio del progetto GEPA MASTER.
 | `start-server.bat` | Avvio manuale del solo server (utile per debug o percorsi di rete UNC). |
 | `server.ps1` | Server HTTP in PowerShell puro su `http://localhost:5030`. |
 | `OSL TRIESTE.html` | L'app single-file (HTML + CSS + JS). |
-| `logo.png` | *(da aggiungere tu)* lo stemma della nave, in alto a sinistra. |
+| `logo.png` | *(opzionale)* stemma raster: se presente sostituisce lo stemma vettoriale integrato. |
 | `OSL TRIESTE.json` | Dati principali (creato in automatico). |
 | `OSL TRIESTE.json.backup` | Copia di sicurezza creata ad ogni salvataggio. |
 | `OSL TRIESTE local.json` | Dati leggeri/frequenti (scontrino in corso). |
@@ -20,8 +20,9 @@ meccanica di avvio del progetto GEPA MASTER.
 ## Come si avvia
 
 1. Copia l'intera cartella su un PC **Windows**.
-2. *(consigliato)* Salva lo stemma della nave come **`logo.png`** in questa cartella
-   (se manca, l'app mostra comunque uno stemma tricolore di ripiego).
+2. Lo stemma della nave è già integrato nell'app (disegno vettoriale in alto a
+   sinistra). *(Facoltativo)* per usare l'immagine raster esatta, salva il file
+   come **`logo.png`** in questa cartella: se presente sostituisce lo stemma vettoriale.
 3. Doppio clic su **`APRI_APP.bat`**.
 4. Si apre Microsoft Edge su `http://localhost:5030`. Se non si apre da solo, vai a
    quell'indirizzo con qualunque browser.
