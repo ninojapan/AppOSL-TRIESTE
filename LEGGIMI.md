@@ -40,20 +40,26 @@ meccanica di avvio del progetto GEPA MASTER.
   inventario vedrai più scadenze con le rispettive rimanenze. Le foto caricate
   vengono salvate nella cartella **`IMMAGINI/`**, non sparse nella cartella
   principale.
-- **Cassa (lettore)**: il lettore di codici a barre è **sempre attivo**, in
-  qualunque punto dell'app abbia il focus (es. anche mentre stai digitando la
-  quantità o cercando un cliente) — non serve mai ricliccare sul campo apposito.
-  Alla scansione si apre una finestra per la **quantità**; premi **Invio** (o
-  clicca "Aggiungi") per confermarla nello scontrino, oppure digita la quantità
-  a mano. Se scansioni di nuovo lo **stesso** codice, la quantità aumenta; se
-  scansioni un codice **diverso**, il prodotto precedente viene registrato nello
-  scontrino con la quantità impostata fino a quel momento e si passa al nuovo
-  prodotto — esattamente come alla cassa di un supermercato. Premendo
-  **INCASSA/F2** l'eventuale prodotto ancora "in sospeso" viene registrato
-  automaticamente prima di chiudere lo scontrino. Codici non a catalogo vengono
-  precompilati nel form prodotto (sezione Inventario).
-- **Vendita manuale**: griglia dei prodotti con immagini; clic → scelta quantità →
-  Invio.
+- **Inventario → tabella prodotti → ✏️ Modifica**: oltre ai dati anagrafici, il
+  modal mostra tutti i **lotti a magazzino** con quantità e scadenza modificabili
+  (pulsanti −/+ o digitazione diretta, per correggere/aumentare un lotto già
+  esistente) e permette di **aggiungere un nuovo lotto** con una scadenza diversa
+  senza dover ridigitare nome/codice del prodotto. Le modifiche ai lotti vengono
+  applicate al clic su "Salva".
+- **Cassa (lettore o clic manuale — un solo pannello)**: la stessa schermata
+  gestisce sia le scansioni che l'aggiunta manuale con un clic sul prodotto. Il
+  lettore di codici a barre è **sempre attivo**, in qualunque punto dell'app
+  abbia il focus (es. anche mentre stai digitando la quantità o cercando un
+  cliente) — non serve mai ricliccare sul campo apposito. Alla scansione o al
+  clic si apre una finestra per la **quantità**; premi **Invio** (o clicca
+  "Aggiungi") per confermarla nello scontrino, oppure digita la quantità a mano.
+  Se scansioni di nuovo lo **stesso** codice, la quantità aumenta; se scansioni
+  un codice **diverso**, il prodotto precedente viene registrato nello scontrino
+  con la quantità impostata fino a quel momento e si passa al nuovo prodotto —
+  esattamente come alla cassa di un supermercato. Premendo **INCASSA/F2**
+  l'eventuale prodotto ancora "in sospeso" viene registrato automaticamente
+  prima di chiudere lo scontrino. Codici non a catalogo vengono precompilati
+  nel form prodotto (sezione Inventario).
 - **INCASSA (F2)**: chiude lo scontrino, registra la vendita, scala il magazzino
   (le scadenze più vicine per prime, FIFO), aggiorna gli incassi e la cassa torna
   subito pronta per il cliente successivo.

@@ -324,7 +324,6 @@ kbd{background:var(--panel3);border:1px solid var(--border);border-bottom-width:
 
     <nav class="nav" id="nav">
       <button data-view="cassa" class="active"><span class="ic">🧾</span>Cassa</button>
-      <button data-view="manuale"><span class="ic">🛒</span>Vendita</button>
       <button data-view="inventario"><span class="ic">📦</span>Inventario</button>
       <button data-view="tessere"><span class="ic">💳</span>Tessere</button>
       <button data-view="registro"><span class="ic">📒</span>Registro</button>
@@ -338,22 +337,13 @@ kbd{background:var(--panel3);border:1px solid var(--border);border-bottom-width:
   <!-- ============ CONTENT ============ -->
   <main class="content">
 
-    <!-- ---- CASSA ---- -->
+    <!-- ---- CASSA (lettore + clic manuale) ---- -->
     <section id="view-cassa" class="view active">
-      <div class="view-head"><h2><span class="ic">🧾</span> Cassa — Lettore codice a barre</h2></div>
+      <div class="view-head"><h2><span class="ic">🧾</span> Cassa — Lettore o clic sul prodotto</h2></div>
       <div class="toolbar">
         <div class="search"><span class="mag">🔎</span><input id="searchCassa" placeholder="Cerca prodotto per nome o categoria..."></div>
       </div>
       <div class="grid" id="gridCassa"></div>
-    </section>
-
-    <!-- ---- VENDITA MANUALE ---- -->
-    <section id="view-manuale" class="view">
-      <div class="view-head"><h2><span class="ic">🛒</span> Vendita manuale</h2></div>
-      <div class="toolbar">
-        <div class="search"><span class="mag">🔎</span><input id="searchManuale" placeholder="Cerca prodotto..."></div>
-      </div>
-      <div class="grid" id="gridManuale"></div>
     </section>
 
     <!-- ---- INVENTARIO ---- -->
@@ -547,7 +537,7 @@ kbd{background:var(--panel3);border:1px solid var(--border);border-bottom-width:
 
 <!-- ============ MODAL EDIT PRODOTTO ============ -->
 <div class="overlay" id="prodOverlay">
-  <div class="modal">
+  <div class="modal card-modal tall">
     <div class="modal-head"><h3 id="poTitle">Modifica prodotto</h3><button class="x" id="poClose">×</button></div>
     <div class="modal-body">
       <div class="field"><label>Denominazione</label><input id="po-name"></div>
@@ -559,10 +549,21 @@ kbd{background:var(--panel3);border:1px solid var(--border);border-bottom-width:
       <div class="field"><label>Immagine</label>
         <div class="imgpick"><img id="po-imgprev" class="imgprev" alt=""><input id="po-img" type="file" accept="image/*" style="font-size:12px;flex:1"></div>
       </div>
-      <div class="modal-foot" style="margin-top:6px">
-        <button class="btn ghost" id="poCancel">Chiudi</button>
-        <button class="btn blue" id="poSave">Salva ✓</button>
+
+      <div class="sect-title">📦 Magazzino / Lotti esistenti</div>
+      <div id="poBatches"></div>
+
+      <div class="sect-title">➕ Aggiungi nuovo lotto</div>
+      <div class="row2">
+        <div class="field"><label>Quantità</label><input id="pb-qty" type="number" min="1" value="1"></div>
+        <div class="field"><label>Scadenza</label><input id="pb-expiry" type="date"></div>
       </div>
+      <button class="btn" onclick="addProdBatch()">Aggiungi lotto</button>
+      <div class="hint">Usa "Aggiungi nuovo lotto" per un carico con scadenza diversa (es. altre 10 Fanta con scadenza successiva). Per aumentare la quantità di un lotto già esistente, modifica direttamente il numero qui sopra.</div>
+    </div>
+    <div class="modal-foot" id="poFoot">
+      <button class="btn ghost" id="poCancel">Chiudi</button>
+      <button class="btn blue" id="poSave">Salva ✓</button>
     </div>
   </div>
 </div>
@@ -994,13 +995,13 @@ function renderAll(){
   renderCatList();
   renderCart();
   renderGrid('gridCassa', $('searchCassa').value);
-  renderGrid('gridManuale', $('searchManuale').value);
   renderInventory();
   renderTessere();
   renderRegistro();
   renderStats();
   renderIncasso();
   if($('cardOverlay').classList.contains('open') && openCardId) renderCardDynamic(openCardId);
+  if($('prodOverlay').classList.contains('open') && editProdId) renderProdBatches(editProdId);
 }
 
 function renderCatList(){
@@ -1135,7 +1136,42 @@ function openProdEdit(id){
   $('po-name').value=p.name; $('po-barcode').value=p.barcode||''; $('po-cat').value=p.category||''; $('po-price').value=p.price||0;
   const prev=$('po-imgprev'); if(p.image){prev.src=p.image;prev.style.display='block';}else{prev.removeAttribute('src');prev.style.display='none';}
   $('po-img').value='';
+  $('pb-qty').value='1'; $('pb-expiry').value='';
+  renderProdBatches(id);
   $('prodOverlay').classList.add('open');
+}
+function renderProdBatches(id){
+  const p=getProduct(id); if(!p)return;
+  const box=$('poBatches'); if(!box)return;
+  const batches=p.batches.slice().sort(byExpiry);
+  box.innerHTML = batches.length? batches.map(b=>{
+    const i=expiryInfo(b.expiry);
+    return `<div class="recharge-row">
+      <div class="qtybox">
+        <button onclick="prodBatchQty('${b.id}',-1)">−</button>
+        <input class="q" type="number" min="0" value="${b.qty}" data-batch-qty="${b.id}" style="width:56px;text-align:center;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:6px" oninput="prodBatchTouch('${b.id}')">
+        <button onclick="prodBatchQty('${b.id}',1)">+</button>
+      </div>
+      <input type="date" value="${b.expiry||''}" data-batch-exp="${b.id}" style="padding:7px 9px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12.5px" onchange="prodBatchTouch('${b.id}')">
+      <span class="rr-main ${i.cls}" style="font-size:12px">${i.label}</span>
+      <button class="iconbtn danger" title="Elimina lotto" onclick="delBatch('${id}','${b.id}')">🗑️</button>
+    </div>`;
+  }).join('') : `<div style="color:var(--muted2);font-size:13px">Nessun lotto a magazzino.</div>`;
+}
+function prodBatchQty(bid,d){
+  const inp=document.querySelector(`[data-batch-qty="${bid}"]`); if(!inp)return;
+  inp.value=Math.max(0,(parseInt(inp.value)||0)+d);
+}
+function prodBatchTouch(){ /* i valori vengono letti al momento del Salva */ }
+function addProdBatch(){
+  const p=getProduct(editProdId); if(!p)return;
+  const qty=parseInt($('pb-qty').value)||0;
+  const expiry=$('pb-expiry').value||'';
+  if(qty<=0){ toast('Quantità non valida','warn'); return; }
+  p.batches.push({id:uid(),qty,expiry,addedAt:new Date().toISOString()});
+  $('pb-qty').value='1'; $('pb-expiry').value='';
+  saveDB(); renderAll();
+  toast('Nuovo lotto aggiunto: '+qty+' pz'+(expiry?(' · scad. '+fmtDate(expiry)):''),'ok');
 }
 $('po-img').addEventListener('change', async e=>{
   const f=e.target.files[0]; if(!f)return;
@@ -1151,6 +1187,16 @@ $('poSave').onclick=()=>{
   p.category=$('po-cat').value.trim()||'Varie';
   p.price=parseFloat($('po-price').value)||0;
   if(editProdImg!=null) p.image=editProdImg;
+  // sincronizza le modifiche a quantità/scadenza dei lotti esistenti
+  document.querySelectorAll('[data-batch-qty]').forEach(inp=>{
+    const b=p.batches.find(x=>x.id===inp.dataset.batchQty); if(!b)return;
+    b.qty=Math.max(0,parseInt(inp.value)||0);
+  });
+  document.querySelectorAll('[data-batch-exp]').forEach(inp=>{
+    const b=p.batches.find(x=>x.id===inp.dataset.batchExp); if(!b)return;
+    b.expiry=inp.value||'';
+  });
+  p.batches=p.batches.filter(b=>b.qty>0); // rimuovi i lotti azzerati
   CART.forEach(l=>{ if(l.productId===p.id){ l.name=p.name; l.unitPrice=p.price; } });
   saveDB(); renderAll(); $('prodOverlay').classList.remove('open');
   toast('Prodotto aggiornato','ok');
@@ -1643,7 +1689,6 @@ $('btnAdd').onclick=()=>{
 
 // ricerche
 $('searchCassa').addEventListener('input',e=>renderGrid('gridCassa',e.target.value));
-$('searchManuale').addEventListener('input',e=>renderGrid('gridManuale',e.target.value));
 $('searchInv').addEventListener('input',renderInventory);
 $('searchReg').addEventListener('input',renderRegistro);
 $('searchTes').addEventListener('input',renderTessere);
