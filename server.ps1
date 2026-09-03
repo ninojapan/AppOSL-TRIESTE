@@ -18,6 +18,13 @@ if ([string]::IsNullOrWhiteSpace($ScriptDir)) { $ScriptDir = (Get-Location).Path
 $DataFile   = Join-Path $ScriptDir "$AppName.json"
 $LocalFile  = Join-Path $ScriptDir "$AppName local.json"
 $BackupFile = "$DataFile.backup"
+$ImagesDir  = Join-Path $ScriptDir "IMMAGINI"
+
+# Cartella immagini prodotti: creata se assente, cosi' le foto non finiscono
+# sparse nella cartella principale dell'app
+if (-not (Test-Path $ImagesDir)) {
+  New-Item -ItemType Directory -Path $ImagesDir | Out-Null
+}
 
 # UTF-8 SENZA BOM ovunque
 $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
@@ -90,6 +97,17 @@ function Send-JsonResponse($response, $json, $status = 200) {
   Send-ByteResponse $response $bytes "application/json; charset=utf-8" $status
 }
 
+function Get-SafeImageFilename($name) {
+  # accetta solo un nome file semplice (niente percorsi/traversal) con
+  # estensione immagine nota, per scrivere in sicurezza dentro IMMAGINI/
+  if ([string]::IsNullOrWhiteSpace($name)) { return $null }
+  $name = [System.IO.Path]::GetFileName($name)
+  if ($name -notmatch '^[A-Za-z0-9_\-\.]+$') { return $null }
+  $ext = [System.IO.Path]::GetExtension($name).ToLower()
+  if ($ext -ne ".jpg" -and $ext -ne ".jpeg" -and $ext -ne ".png") { return $null }
+  return $name
+}
+
 function Send-StaticFile($response, $path) {
   if ($path -eq "/" -or [string]::IsNullOrWhiteSpace($path)) {
     $path = "/$HtmlFile"
@@ -143,6 +161,7 @@ Write-Host ""
 Write-Host "   App:          " -NoNewline; Write-Host "http://localhost:$Port" -ForegroundColor Green
 Write-Host "   File dati:    $DataFile"   -ForegroundColor Gray
 Write-Host "   File locale:  $LocalFile"  -ForegroundColor Gray
+Write-Host "   Immagini:     $ImagesDir"  -ForegroundColor Gray
 Write-Host ""
 Write-Host "   Per FERMARE il server: premi " -NoNewline; Write-Host "CTRL+C" -ForegroundColor Yellow
 Write-Host "==================================================" -ForegroundColor Cyan
@@ -195,6 +214,27 @@ try {
         $body = Get-RequestBody $request
         Write-TextFileUtf8 $LocalFile $body
         Send-JsonResponse $response '{"status":"ok"}'
+      }
+      elseif ($path -eq "/api/upload-image" -and $method -eq "POST") {
+        # salva una foto prodotto dentro IMMAGINI/ (fuori dalla cartella principale)
+        $body = Get-RequestBody $request
+        $json = $body | ConvertFrom-Json
+        $safeName = Get-SafeImageFilename $json.filename
+        if (-not $safeName) {
+          Send-JsonResponse $response '{"status":"error","message":"nome file non valido"}' 400
+        }
+        else {
+          try {
+            $b64 = [string]$json.dataUrl -replace '^data:[^;]+;base64,', ''
+            $bytes = [Convert]::FromBase64String($b64)
+            $destPath = Join-Path $ImagesDir $safeName
+            [System.IO.File]::WriteAllBytes($destPath, $bytes)
+            Send-JsonResponse $response ('{"status":"ok","path":"IMMAGINI/' + $safeName + '"}')
+          }
+          catch {
+            Send-JsonResponse $response '{"status":"error","message":"upload immagine fallito"}' 500
+          }
+        }
       }
       else {
         # ----------------------- File statici ------------------------

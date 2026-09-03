@@ -13,6 +13,7 @@ meccanica di avvio del progetto GEPA MASTER.
 | `server.ps1` | Server HTTP in PowerShell puro su `http://localhost:5030`. |
 | `OSL TRIESTE.html` | L'app single-file (HTML + CSS + JS). |
 | `logo.png` | **da aggiungere tu**: lo stemma della nave mostrato in alto a sinistra. |
+| `IMMAGINI/` | **creata in automatico**: qui vengono salvate le foto dei prodotti (non nella cartella principale). |
 | `OSL TRIESTE.json` | Dati principali (creato in automatico). |
 | `OSL TRIESTE.json.backup` | Copia di sicurezza creata ad ogni salvataggio. |
 | `OSL TRIESTE local.json` | Dati leggeri/frequenti (scontrino in corso). |
@@ -32,20 +33,30 @@ meccanica di avvio del progetto GEPA MASTER.
 
 ## Come si usa
 
-- **Pannello sinistro — Nuovo prodotto / Carico**: denominazione, codice a barre,
-  quantità, scadenza, prezzo, categoria e immagine. Se denominazione o codice
-  coincidono con un prodotto esistente, la quantità entra come **nuovo lotto** con
-  la sua scadenza → in inventario vedrai più scadenze con le rispettive rimanenze.
-- **Cassa (lettore)**: il lettore di codici a barre è sempre in ascolto. Alla
-  scansione si apre una finestra per la **quantità**; premi **Invio** per aggiungere
-  allo scontrino. Se **non** premi Invio e scansioni un altro prodotto, quello
-  precedente viene aggiunto (1 pezzo, o i pezzi accumulati scansionandolo più volte)
-  e si passa al nuovo prodotto — come al supermercato. Codici non a catalogo vengono
-  precompilati nel form prodotto.
+- **Inventario → Nuovo prodotto / Carico** (pannello a sinistra, visibile solo in
+  questa sezione): denominazione, codice a barre, quantità, scadenza, prezzo,
+  categoria e immagine. Se denominazione o codice coincidono con un prodotto
+  esistente, la quantità entra come **nuovo lotto** con la sua scadenza → in
+  inventario vedrai più scadenze con le rispettive rimanenze. Le foto caricate
+  vengono salvate nella cartella **`IMMAGINI/`**, non sparse nella cartella
+  principale.
+- **Cassa (lettore)**: il lettore di codici a barre è **sempre attivo**, in
+  qualunque punto dell'app abbia il focus (es. anche mentre stai digitando la
+  quantità o cercando un cliente) — non serve mai ricliccare sul campo apposito.
+  Alla scansione si apre una finestra per la **quantità**; premi **Invio** (o
+  clicca "Aggiungi") per confermarla nello scontrino, oppure digita la quantità
+  a mano. Se scansioni di nuovo lo **stesso** codice, la quantità aumenta; se
+  scansioni un codice **diverso**, il prodotto precedente viene registrato nello
+  scontrino con la quantità impostata fino a quel momento e si passa al nuovo
+  prodotto — esattamente come alla cassa di un supermercato. Premendo
+  **INCASSA/F2** l'eventuale prodotto ancora "in sospeso" viene registrato
+  automaticamente prima di chiudere lo scontrino. Codici non a catalogo vengono
+  precompilati nel form prodotto (sezione Inventario).
 - **Vendita manuale**: griglia dei prodotti con immagini; clic → scelta quantità →
   Invio.
 - **INCASSA (F2)**: chiude lo scontrino, registra la vendita, scala il magazzino
-  (le scadenze più vicine per prime, FIFO) e aggiorna gli incassi.
+  (le scadenze più vicine per prime, FIFO), aggiorna gli incassi e la cassa torna
+  subito pronta per il cliente successivo.
 - **Registro di cassa**: elenco delle vendite, con modifica ed eliminazione ordine
   (il magazzino viene ripristinato/riadeguato di conseguenza).
 - **Tessere prepagate**: crea una tessera (codice, forza armata, grado, cognome,
@@ -54,11 +65,13 @@ meccanica di avvio del progetto GEPA MASTER.
   pannello scontrino c'è la ricerca **cliente per cognome**: digiti il cognome,
   se più tessere corrispondono le vedi tutte (con grado, nome e credito) e
   clicchi quella giusta. Modificando lo storico di una tessera si aggiornano
-  automaticamente registro di cassa e magazzino.
+  automaticamente registro di cassa e magazzino. **Ogni singola** creazione di
+  tessera e **ogni singola** ricarica richiede la password `Oslalepass1` in una
+  finestra dedicata (non il popup del browser).
 - **Statistiche**: per tipologia, prodotti più venduti, metodo di pagamento,
   top clienti, incasso ultimi 14 giorni.
 - **Incasso**: oggi, ieri, ultimi 7/30 giorni, questo mese o periodo personalizzato
   (dal → al), con split contanti/carte e ricariche incassate.
 
-I dati sono salvati automaticamente su disco in UTF-8 (senza BOM). Da sinistra puoi
-anche **esportare/importare** un backup `.json`.
+I dati sono salvati automaticamente su disco in UTF-8 (senza BOM). Da Inventario
+puoi anche **esportare/importare** un backup `.json`.
