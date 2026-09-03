@@ -120,6 +120,10 @@ input,select,textarea{font-family:inherit}
 .search input{width:100%;padding:11px 12px 11px 38px;background:var(--panel);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;outline:none}
 .search input:focus{border-color:var(--accent)}
 .search .mag{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.filterchips{display:flex;gap:8px;flex-wrap:wrap}
+.fchip{background:var(--panel);color:var(--muted);border:1px solid var(--border);padding:9px 14px;border-radius:11px;font-size:13px;font-weight:600;white-space:nowrap;transition:.15s}
+.fchip:hover{color:var(--text);border-color:var(--accent)}
+.fchip.active{color:#04121f;background:linear-gradient(180deg,var(--accent),var(--accent-d));border-color:var(--accent)}
 
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:18px}
 .kpi{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--border);border-radius:14px;padding:15px 16px;position:relative;overflow:hidden}
@@ -408,6 +412,11 @@ kbd{background:var(--panel3);border:1px solid var(--border);border-bottom-width:
           <div class="kpis" id="invKpis"></div>
           <div class="toolbar">
             <div class="search"><span class="mag">🔎</span><input id="searchInv" placeholder="Cerca prodotto, categoria o codice..."></div>
+            <div class="filterchips" id="invFilters">
+              <button class="fchip active" data-filter="all">Tutti</button>
+              <button class="fchip" data-filter="expiring">⏰ In scadenza (30g)</button>
+              <button class="fchip" data-filter="expired">🚫 Scaduti</button>
+            </div>
           </div>
           <div id="invTable"></div>
         </div>
@@ -1066,6 +1075,8 @@ function renderCart(){
 }
 
 /* ---- Inventario ---- */
+let invExpFilter='all'; // 'all' | 'expiring' | 'expired'
+function setInvFilter(f){ invExpFilter=(invExpFilter===f)?'all':f; renderInventory(); }
 function renderInventory(){
   // KPI
   const totProducts=DB.products.length;
@@ -1079,14 +1090,26 @@ function renderInventory(){
     ${kpi('📦','Prodotti',fmtNum(totProducts),'blue')}
     ${kpi('🔢','Pezzi a magazzino',fmtNum(totUnits),'green')}
     ${kpi('💰','Valore magazzino',fmtMoney(stockValue),'amber')}
-    ${kpi('⏰','In scadenza (30g)',fmtNum(expiring),'violet')}
-    ${kpi('🚫','Scaduti',fmtNum(expired),expired>0?'':'blue')}`;
+    ${kpi('⏰','In scadenza (30g)',fmtNum(expiring),'violet',"setInvFilter('expiring')")}
+    ${kpi('🚫','Scaduti',fmtNum(expired),expired>0?'':'blue',"setInvFilter('expired')")}`;
+  document.querySelectorAll('#invFilters .fchip').forEach(b=>b.classList.toggle('active',b.dataset.filter===invExpFilter));
 
   const filter=($('searchInv').value||'').toLowerCase().trim();
   let list=DB.products.slice().sort((a,b)=>a.name.localeCompare(b.name));
   if(filter) list=list.filter(p=>p.name.toLowerCase().includes(filter)||(p.category||'').toLowerCase().includes(filter)||(p.barcode||'').includes(filter));
+  if(invExpFilter!=='all'){
+    list=list.filter(p=>p.batches.some(b=>{
+      const cls=expiryInfo(b.expiry).cls;
+      return invExpFilter==='expired' ? cls==='exp-bad' : cls==='exp-warn';
+    }));
+  }
 
-  if(!list.length){ $('invTable').innerHTML=`<div class="empty"><span class="big">📦</span>Nessun prodotto in inventario.</div>`; return; }
+  if(!list.length){
+    const msg = invExpFilter==='expired' ? 'Nessun prodotto scaduto.'
+      : invExpFilter==='expiring' ? 'Nessun prodotto in scadenza entro 30 giorni.'
+      : 'Nessun prodotto in inventario.';
+    $('invTable').innerHTML=`<div class="empty"><span class="big">📦</span>${msg}</div>`; return;
+  }
 
   let rows='';
   list.forEach(p=>{
@@ -1601,7 +1624,7 @@ function submitPassword(){
 function closePwModal(){ $('pwOverlay').classList.remove('open'); pwResolve=null; }
 
 /* ---- helpers render ---- */
-function kpi(ic,lab,val,cls){ return `<div class="kpi ${cls||''}"><span class="k-ic">${ic}</span><div class="k-lab">${lab}</div><div class="k-val">${val}</div></div>`; }
+function kpi(ic,lab,val,cls,onclick){ return `<div class="kpi ${cls||''}"${onclick?` onclick="${onclick}" style="cursor:pointer"`:''}><span class="k-ic">${ic}</span><div class="k-lab">${lab}</div><div class="k-val">${val}</div></div>`; }
 function barRow(label,value,max,valueLabel,color){
   const pct=max>0?Math.max(2,Math.round(value/max*100)):0;
   return `<div class="bar"><div class="bar-label" title="${esc(label)}">${esc(label)}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div><div class="bar-val">${valueLabel}</div></div>`;
@@ -1690,6 +1713,10 @@ $('btnAdd').onclick=()=>{
 // ricerche
 $('searchCassa').addEventListener('input',e=>renderGrid('gridCassa',e.target.value));
 $('searchInv').addEventListener('input',renderInventory);
+$('invFilters').addEventListener('click',e=>{
+  const b=e.target.closest('.fchip'); if(!b)return;
+  invExpFilter=b.dataset.filter; renderInventory();
+});
 $('searchReg').addEventListener('input',renderRegistro);
 $('searchTes').addEventListener('input',renderTessere);
 

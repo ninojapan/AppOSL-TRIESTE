@@ -40,6 +40,10 @@ meccanica di avvio del progetto GEPA MASTER.
   inventario vedrai più scadenze con le rispettive rimanenze. Le foto caricate
   vengono salvate nella cartella **`IMMAGINI/`**, non sparse nella cartella
   principale.
+- **Inventario → filtri**: sopra la tabella puoi filtrare rapidamente su
+  **Tutti** / **⏰ In scadenza (30g)** / **🚫 Scaduti** (funzionano insieme alla
+  ricerca testuale). Sono cliccabili anche le due KPI corrispondenti in alto
+  (ri-cliccarle torna a "Tutti").
 - **Inventario → tabella prodotti → ✏️ Modifica**: oltre ai dati anagrafici, il
   modal mostra tutti i **lotti a magazzino** con quantità e scadenza modificabili
   (pulsanti −/+ o digitazione diretta, per correggere/aumentare un lotto già
